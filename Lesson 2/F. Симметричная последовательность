@@ -1,0 +1,74 @@
+# Идея решения:
+# Необходимо найти "центр последовательности", относительно которого будут располагаться одинаковые числа.
+# Центр может быть числом (тогда указатель покажет на среднее число), например: 1 2 3 (4) 3 2 1
+# Или центр может располагаться между числами (тогда нужно два указателя на числа, между которыми он располагается), например: 1 2 () 2 1
+# Будем искать такое число от центра последовательности до его правого конца, относительно которого все числа будут одинаковыми (равняемся на меньший край)
+# Например: 1 2 3 4 (5) 4 3
+# Алгоритм находит, такое число перемещая два указателя. 
+# Когда два указателя показывают на одно число (один и тот же элемент последовательности), это число принимается за возможный центр.
+# Когда два указателя показывают на разные числа (всегда это соседние числа), возможный центр находится между ними.
+
+
+def find_rem_seq(seq):
+    is_polinom = True
+    if (len(seq)%2==0):
+        for i in range(len(seq)//2):
+            if seq[i] != seq[len(seq)-1-i]:
+                is_polinom = False
+                break
+        if is_polinom:
+            return []
+        else:
+            start_center = len(seq)//2
+    else:
+        start_center = (len(seq)-1)//2
+    
+    answer_is_found = False
+    center1 = start_center
+    center2 = start_center
+    
+    center = len(seq)-1
+    while (center1 != len(seq)-1 or center2 != len(seq)-1) and not answer_is_found:
+        if center1 == center2: # Проверяем что центральным является число (итоговая последовательность будет содержать нечетное кол-во символов)
+            is_same = True
+            #len(seq)-center2-1 кол-во чисел после числа, на которое указывает center2
+            min_cnt = min(center1, len(seq)-center2-1)
+            for i in range(1,min_cnt+1):
+                if is_same and seq[center1-i] != seq[center2+i]:
+                    is_same = False
+                    break
+            if  is_same:
+                answer_is_found = True
+                break
+            else:
+                center2 += 1
+        else:# Проверяем что центральным не является число 
+             # (итоговая последовательность будет содержать четное кол-во символов и центр будет находиться между символами center1 и center2)    
+            is_same = True
+            min_cnt = min(center1, len(seq)-center2-1)
+            for i in range(min_cnt+1):
+                if is_same and seq[center1-i] != seq[center2+i]:
+                    is_same = False
+                    break
+            if  is_same:
+                answer_is_found = True
+                break
+            else:
+                center1 += 1
+
+    ans = []
+    cnt_same = len(seq) - center2 - 1
+    for i in range(center1-cnt_same-1, -1,-1):
+        ans.append(seq[i])
+    return ans
+
+n = int(input())
+seq = list(map(int, input().split()))
+
+ans = find_rem_seq(seq)
+if len(ans)==0:
+    print(0)
+else:
+    print(len(ans))
+    print(*ans)
+    
