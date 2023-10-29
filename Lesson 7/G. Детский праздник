@@ -1,0 +1,48 @@
+type_start = 1
+type_end = -1
+
+def get_who_and_when_will_inflate_all_balloons(cnt_helper, events, assistant_capabilities, all_cnt):
+    cnt = 0
+    cnt_inflated_by_each = [0]*cnt_helper
+    i = 0
+    # events постоянно будут пополнятся новыми сибытиями, но цикл не уйдет в бесконечность при заданных ограничениях T, Z, Y
+    while i < len(events):
+        if events[i][1] == type_end:
+            cnt += 1
+            i_helper = events[i][2]
+            cnt_inflated_by_each[i_helper] += 1
+            # Если помощник надул свою норму, то он делает отдых на свое время "cnt_consecutive_inflat"
+            # Иначе сразу же начинает надуввать следующий шарик
+            if cnt_inflated_by_each[i_helper] % assistant_capabilities[i_helper]["cnt_consecutive_inflat"] == 0:
+                T = events[i][0] + assistant_capabilities[i_helper]["t_rest"]
+            else:
+                T = events[i][0] 
+            events.append((T, type_start, events[i][2]))
+            events.sort()
+        elif events[i][1] == type_start:
+            i_helper = events[i][2]
+            T = events[i][0] + assistant_capabilities[i_helper]["t_inflat"]
+            events.append((T, type_end, events[i][2]))
+            events.sort()
+        if (cnt >= all_cnt):
+            return events[i][0], cnt_inflated_by_each
+        i += 1    
+    
+
+assistant_capabilities = {} # Справочная информация о каждом помощнике
+first_inflats = []
+
+M, N = map(int, input().split())
+for i in range(N):
+    T, Z, Y = map(int, input().split())
+    assistant_capabilities[i] = {"t_inflat":T, "cnt_consecutive_inflat":Z, "t_rest":Y}
+    # Добавляем только завершение надувания первого шарика, т.к. все помощники начинают работу в 0 времени
+    first_inflats.append((T, type_end, i)) 
+if M == 0:
+    print(0)
+    print(*[0]*N)
+else:
+    first_inflats.sort()
+    T, cnt_inflated_by_each = get_who_and_when_will_inflate_all_balloons(N, first_inflats, assistant_capabilities, M)
+    print(T)
+    print(*cnt_inflated_by_each)
